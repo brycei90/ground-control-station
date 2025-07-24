@@ -7,7 +7,7 @@ def set_auto(the_connection):
         the_connection.target_component,
         mavutil.mavlink.MAV_CMD_DO_SET_MODE,
         0,  # confirmation
-        0,  # command specific parameters
+        mavutil.mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED,  # command specific parameters
         3,  # set auto
         0,
         0,
