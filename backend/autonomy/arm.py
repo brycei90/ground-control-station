@@ -1,8 +1,6 @@
 from pymavlink import mavutil
-import connection
 
 the_connection = mavutil.mavlink_connection("udp:172.23.192.1:14550")
-print("connected")
 
 
 def arm_drone():
@@ -39,6 +37,3 @@ def disarm_drone():
     )
     msg = the_connection.recv_match(type="COMMAND_ACK", blocking=True)
     print(msg)
-
-
-disarm_drone()

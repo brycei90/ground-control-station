@@ -1,6 +1,7 @@
 from pymavlink import mavutil
 
-the_connection = mavutil.mavlink_connection("udp:127.0.0.1:14550")
+the_connection = mavutil.mavlink_connection("udp:172.23.192.1:14550")
+print("connected")
 
 
 def set_auto():
@@ -11,6 +12,7 @@ def set_auto():
         0,  # confirmation
         0,  # command specific parameters
         3,  # set auto
+        0,
         0,
         0,
         0,
@@ -32,6 +34,7 @@ def set_stabilize():
         0,
         0,
         0,
+        0,
     )
     msg = the_connection.recv_match(type="COMMAND_ACK", blocking=True)
     print(msg)
@@ -45,6 +48,7 @@ def set_autoTune():
         0,  # confirmation
         0,  # command specific parameters
         15,  # set autotune
+        0,
         0,
         0,
         0,
@@ -66,6 +70,7 @@ def RTL():
         0,
         0,
         0,
+        0,
     )
     msg = the_connection.recv_match(type="COMMAND_ACK", blocking=True)
     print(msg)
@@ -79,6 +84,7 @@ def Loiter():
         0,  # confirmation
         0,  # command specific parameters
         5,
+        0,
         0,
         0,
         0,

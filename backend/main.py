@@ -1,3 +1,4 @@
+import json
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -22,6 +23,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+the_connection = mavutil.mavlink_connection("udp:172.23.192.1:14550")
 print("connected to MAVLink")
 
 
@@ -31,10 +33,15 @@ class ModeRequest(BaseModel):
 
 @app.post("/arm", response_model=ModeRequest)
 async def set_arm():
-    if mode == "arm":
-        arm_drone()
-    else:
-        disarm_drone()
+    try:
+        if mode == "arm":
+            print("it works")
+            # arm_drone()
+        else:
+            print("worked")
+            # disarm_drone()
+    except:
+        print("could not arm/disarm")
 
 
 @app.post("/mode", response_model=ModeRequest)
@@ -53,8 +60,20 @@ async def set_manual():
     return mode
 
 
-@app.get("/position")
+@app.post("/voltage")
+async def volage():
+    return 5.0
+
+
+@app.post("/current")
+async def current():
+    return 7.0
+
+
+@app.get("/gps_position")
 async def get_gps_position():
     print("Received GPS request")
     msg = the_connection.recv_match(type="GLOBAL_POSITION_INT", blocking=True)
-    return {"lat": msg.lat / 1e7, "lon": msg.lon / 1e7, "alt": msg.alt / 1000}
+    position = {"lat": msg.lat / 1e7, "lon": msg.lon / 1e7, "alt": msg.alt / 1000}
+    json_position = json.dumps(position)
+    return json_position

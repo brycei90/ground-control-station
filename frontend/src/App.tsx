@@ -7,8 +7,8 @@ import Current from "./components/Current";
 import { Voltage } from "./components/Voltage";
 import { Altitude } from "./components/Altitude";
 import { Arm } from "./components/Arm";
-import Connection from "./components/connection";
-import Mode from "./components/mode";
+import Connection from "./components/Connection";
+import Mode from "./components/Mode";
 import SetMode from "./components/setMode";
 
 function App() {
