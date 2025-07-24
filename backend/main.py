@@ -24,6 +24,12 @@ app.add_middleware(
 )
 
 the_connection = mavutil.mavlink_connection("udp:172.23.192.1:14550")
+
+the_connection.wait_heartbeat()
+print(
+    "Heartbeat from system (system %u component %u)"
+    % (the_connection.target_system, the_connection.target_component)
+)
 print("connected to MAVLink")
 
 
@@ -31,33 +37,36 @@ class ModeRequest(BaseModel):
     mode: str
 
 
-@app.post("/arm", response_model=ModeRequest)
-async def set_arm():
-    try:
-        if mode == "arm":
-            print("it works")
-            # arm_drone()
-        else:
-            print("worked")
-            # disarm_drone()
-    except:
-        print("could not arm/disarm")
+class ArmRequest(BaseModel):
+    mode: str
 
 
-@app.post("/mode", response_model=ModeRequest)
-async def set_manual():
-    if mode == "auto":
-        mode.set_auto()
-    elif mode == "stabilize":
-        mode.set_stabilize()
-    elif mode == "RTL":
-        mode.RTL()
-    elif mode == "loiter":
-        mode.loiter()
-    elif mode == "autotune":
-        mode.set_autoTune()
-    print(mode)
-    return mode
+@app.post("/arm")
+async def set_arm(request: ArmRequest):
+    if request.mode == "arm":
+        arm_drone(the_connection)
+    elif request.mode == "disarm":
+        disarm_drone(the_connection)
+    else:
+        print("invalid")
+        return {"error": "invalid mode"}
+    print(request.mode)
+
+
+@app.post("/mode")
+async def set_manual(request: ModeRequest):
+    if request.mode == "auto":
+        mode.set_auto(the_connection)
+    elif request.mode == "stabilize":
+        mode.set_stabilize(the_connection)
+    elif request.mode == "RTL":
+        mode.RTL(the_connection)
+    elif request.mode == "loiter":
+        mode.Loiter(the_connection)
+    elif request.mode == "autotune":
+        mode.set_autoTune(the_connection)
+    print(request.mode)
+    return request.mode
 
 
 @app.post("/voltage")

@@ -1,9 +1,8 @@
 from pymavlink import mavutil
 
-the_connection = mavutil.mavlink_connection("udp:172.23.192.1:14550")
 
-
-def arm_drone():
+def arm_drone(the_connection):
+    print("arming...")
     the_connection.mav.command_long_send(
         the_connection.target_system,
         the_connection.target_component,
@@ -21,7 +20,7 @@ def arm_drone():
     print(msg)
 
 
-def disarm_drone():
+def disarm_drone(the_connection):
     the_connection.mav.command_long_send(
         the_connection.target_system,
         the_connection.target_component,

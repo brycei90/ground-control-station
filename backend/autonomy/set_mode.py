@@ -1,10 +1,7 @@
 from pymavlink import mavutil
 
-the_connection = mavutil.mavlink_connection("udp:172.23.192.1:14550")
-print("connected")
 
-
-def set_auto():
+def set_auto(the_connection):
     the_connection.mav.command_long_send(
         the_connection.target_system,
         the_connection.target_component,
@@ -22,7 +19,7 @@ def set_auto():
     print(msg)
 
 
-def set_stabilize():
+def set_stabilize(the_connection):
     the_connection.mav.command_long_send(
         the_connection.target_system,
         the_connection.target_component,
@@ -40,7 +37,7 @@ def set_stabilize():
     print(msg)
 
 
-def set_autoTune():
+def set_autoTune(the_connection):
     the_connection.mav.command_long_send(
         the_connection.target_system,
         the_connection.target_component,
@@ -58,7 +55,7 @@ def set_autoTune():
     print(msg)
 
 
-def RTL():
+def RTL(the_connection):
     the_connection.mav.command_long_send(
         the_connection.target_system,
         the_connection.target_component,
@@ -76,8 +73,8 @@ def RTL():
     print(msg)
 
 
-def Loiter():
-    the_connection.mav.command_int(
+def Loiter(the_connection):
+    the_connection.mav.command_int_send(
         the_connection.target_system,
         the_connection.target_component,
         mavutil.mavlink.MAV_CMD_DO_SET_MODE,
