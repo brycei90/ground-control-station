@@ -8,14 +8,20 @@ const Connection = () => {
     const fetchConnection = async () => {
       try {
         const response = await api.get("/connection_status");
-        console.log(response);
-        setConnection("Connected");
+        console.log(response.data);
+        if (response.data.mode == "connected") {
+          setConnection("connected");
+        } else {
+          setConnection("disconnected");
+        }
       } catch (error) {
         console.error("Failed to connect", error);
       }
     };
     fetchConnection();
-  }, [connection]);
+    const interval = setInterval(fetchConnection, 3000);
+    return () => clearInterval(interval);
+  }, []);
   return <div>{connection}</div>;
 };
 

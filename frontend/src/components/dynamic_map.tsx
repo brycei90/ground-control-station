@@ -13,13 +13,10 @@ const DynamicMap = () => {
   useEffect(() => {
     const fetch_position = async () => {
       try {
-        const response = await api.get<LatLngExpression, LatLngExpression>(
-          "/gps_position"
-        );
-        const pos = response;
-        update_position(pos);
+        const response = await api.get("/position");
+        update_position(response.data);
       } catch (error) {
-        console.error("Error fetching GPS location", error);
+        console.error("Error fetching position:", error);
       }
     };
     fetch_position();

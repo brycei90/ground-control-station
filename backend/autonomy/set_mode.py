@@ -25,7 +25,7 @@ def set_stabilize(the_connection):
         the_connection.target_component,
         mavutil.mavlink.MAV_CMD_DO_SET_MODE,
         0,  # confirmation
-        0,  # command specific parameters
+        mavutil.mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED,  # command specific parameters
         0,  # set stabilize
         0,
         0,
@@ -43,7 +43,7 @@ def set_autoTune(the_connection):
         the_connection.target_component,
         mavutil.mavlink.MAV_CMD_DO_SET_MODE,
         0,  # confirmation
-        0,  # command specific parameters
+        mavutil.mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED,  # command specific parameters
         15,  # set autotune
         0,
         0,
@@ -61,7 +61,7 @@ def RTL(the_connection):
         the_connection.target_component,
         mavutil.mavlink.MAV_CMD_DO_SET_MODE,
         0,  # confirmation
-        0,  # command specific parameters
+        mavutil.mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED,  # command specific parameters
         6,  # set loiter
         0,
         0,
@@ -79,7 +79,7 @@ def Loiter(the_connection):
         the_connection.target_component,
         mavutil.mavlink.MAV_CMD_DO_SET_MODE,
         0,  # confirmation
-        0,  # command specific parameters
+        mavutil.mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED,  # command specific parameters
         5,
         0,
         0,
