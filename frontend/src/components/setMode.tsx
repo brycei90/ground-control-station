@@ -29,7 +29,7 @@ const SetAuto = () => {
             clickHandler("stabilize");
           }}
         >
-          Angle
+          Stabilize
         </Dropdown.Item>
         <Dropdown.Item
           onClick={() => {

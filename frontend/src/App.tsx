@@ -4,7 +4,7 @@ import Graph from "./components/Graph";
 import Header from "./components/Header";
 import DynamicMap from "./components/dynamic_map";
 import Current from "./components/Current";
-import { Voltage } from "./components/Voltage";
+import Voltage from "./components/Voltage";
 import { Altitude } from "./components/Altitude";
 import { Arm } from "./components/Arm";
 import Connection from "./components/Connection";
@@ -13,16 +13,23 @@ import SetMode from "./components/setMode";
 
 function App() {
   return (
-    <>
-      <div>
+    <div className="bg-light text-dark min-vh-100 p-2">
+      <div className="container p-1">
         <Header />
       </div>
-      <div className="d-flex">
+      <div className="d-flex p-2">
         <DynamicMap />
         <Graph />
       </div>
-      <div style={{ maxWidth: "40%" }}>
-        <ul className="list-group list-group-horizontal">
+      <div style={{ maxWidth: "40%" }} className="p-2">
+        <ul className="list-group list-group-horizontal p-1 gap-1">
+          <li className="list-group-item flex-fill">
+            <Connection />
+          </li>
+          <li className="list-group-item flex-fill">2</li>
+          <li className="list-group-item flex-fill">3</li>
+        </ul>
+        <ul className="list-group list-group-horizontal p-1 gap-1">
           <li className="list-group-item flex-fill">
             <Voltage />
           </li>
@@ -46,9 +53,7 @@ function App() {
           <li className="list-group-item flex-fill">A third item</li>
         </ul>
       </div>
-
-      <Connection />
-    </>
+    </div>
   );
 }
 

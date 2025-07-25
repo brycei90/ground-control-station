@@ -8,7 +8,6 @@ const Connection = () => {
     const fetchConnection = async () => {
       try {
         const response = await api.get("/connection_status");
-        console.log(response.data);
         if (response.data.mode == "connected") {
           setConnection("connected");
         } else {

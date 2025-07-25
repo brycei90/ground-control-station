@@ -1,21 +1,38 @@
 import React, { useEffect, useState } from "react";
-import api from "../api";
 
-export const Current = () => {
-  const [Current, updateCurrent] = useState<GLfloat>(0);
+const Current = () => {
+  const [current, updateCurrent] = useState<number>(0);
+
   useEffect(() => {
-    const fetchVoltage = async () => {
+    const socket = new WebSocket("ws://localhost:8000/battery");
+
+    socket.onmessage = (event) => {
       try {
-        const response = await api.get<GLfloat, GLfloat>("/current");
-        updateCurrent(response);
+        const data = JSON.parse(event.data);
+        if ("current" in data) {
+          updateCurrent(data.current);
+        }
       } catch (error) {
-        console.error("error getting voltage", error);
+        console.error("Error parsing WebSocket data:", error);
       }
     };
-    fetchVoltage();
-  });
 
-  return <div>Current: {Current}A</div>;
+    socket.onerror = (err) => {
+      console.error("WebSocket error for current:", err);
+    };
+
+    socket.onclose = () => {
+      console.log("WebSocket closed");
+    };
+
+    return () => socket.close(); // cleanup on unmount
+  }, []);
+
+  return (
+    <div>
+      <strong>Current:</strong> {current.toFixed(2)} A
+    </div>
+  );
 };
 
 export default Current;

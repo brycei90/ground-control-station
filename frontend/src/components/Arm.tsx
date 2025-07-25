@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import api from "../api";
 
 export const Arm = () => {
-  const [arm, setArm] = useState("Arm");
+  const [arm, setArm] = useState("none");
   const [click, setClick] = useState(0);
 
   useEffect(() => {

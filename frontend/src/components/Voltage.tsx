@@ -1,23 +1,37 @@
 import React, { useEffect, useState } from "react";
-import api from "../api";
 
-export const Voltage = () => {
-  const [Voltage, updateVoltage] = useState<GLfloat>(0);
+const Voltage = () => {
+  const [voltage, updateVoltage] = useState<number>(0);
+
   useEffect(() => {
-    const fetchVoltage = async () => {
+    const socket = new WebSocket("ws://localhost:8000/battery");
+
+    socket.onmessage = (event) => {
       try {
-        const response = await api.get<GLfloat, GLfloat>("/voltage");
-        updateVoltage(response);
+        const data = JSON.parse(event.data);
+        if ("voltage" in data) {
+          console.log(data.voltage);
+          updateVoltage(data.voltage);
+        }
       } catch (error) {
-        console.error("error getting voltage", error);
+        console.error("Error parsing WebSocket data:", error);
       }
     };
-    fetchVoltage();
-  });
+
+    socket.onerror = (err) => {
+      console.error("WebSocket error for voltage:", err);
+    };
+
+    socket.onclose = () => {
+      console.log("WebSocket closed");
+    };
+
+    return () => socket.close(); // cleanup on unmount
+  }, []);
 
   return (
     <div>
-      Voltage: {Voltage}V Per-Cell: {Voltage / 6}V
+      <strong>voltage:</strong> {voltage.toFixed(2)} V, per Cell: {voltage / 6}V
     </div>
   );
 };
