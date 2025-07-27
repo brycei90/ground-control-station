@@ -1,9 +1,8 @@
 // import React, { useState } from "react";
 // import api from "../api";
-import type { LatLngExpression } from "leaflet";
+import { type LatLngExpression } from "leaflet";
 import { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import api from "../api";
 
 const DynamicMap = () => {
   const [position, update_position] = useState<LatLngExpression>([
@@ -11,16 +10,18 @@ const DynamicMap = () => {
   ]);
 
   useEffect(() => {
-    const fetch_position = async () => {
+    const socket = new WebSocket("ws://localhost:8000/gps_position");
+
+    socket.onmessage = (event) => {
       try {
-        const response = await api.get("/position");
-        update_position(response.data);
+        const data = JSON.parse(event.data);
+        const new_position: LatLngExpression = [data.lat, data.lon];
+        update_position(new_position);
       } catch (error) {
         console.error("Error fetching position:", error);
       }
     };
-    fetch_position();
-  }, [position]);
+  }, []);
 
   return (
     <MapContainer

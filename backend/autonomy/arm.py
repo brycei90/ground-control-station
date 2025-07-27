@@ -2,7 +2,6 @@ from pymavlink import mavutil
 
 
 def arm_drone(the_connection):
-    print("arming...")
     the_connection.mav.command_long_send(
         the_connection.target_system,
         the_connection.target_component,

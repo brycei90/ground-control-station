@@ -99,7 +99,7 @@ async def get_mode(response_model=ModeRequest):
         21: "SMART_RTL",
     }
     try:
-        msg = the_connection.recv_match(type="HEARTBEAT", blocking=True)
+        msg = the_connection.recv_match(type="HEARTBEAT", blocking=True, timeout=1)
         if msg:
             if msg.custom_mode in ARDUCOPTER_MODES:
                 modeCurrent = {"mode": msg.custom_mode}
@@ -122,7 +122,7 @@ async def battery(websocket: WebSocket):
     await websocket.accept()
     while True:
         try:
-            msg = the_connection.recv_match(type="SYS_STATUS", blocking=True)
+            msg = the_connection.recv_match(type="SYS_STATUS", blocking=True, timeout=1)
             if msg:
                 battery_status = {
                     "voltage": round(msg.voltage_battery / 1000, 2),
@@ -143,7 +143,9 @@ async def get_gps_position(websocket: WebSocket):
     await websocket.accept()
     while True:
         try:
-            msg = the_connection.recv_match(type="GLOBAL_POSITION_INT", blocking=True)
+            msg = the_connection.recv_match(
+                type="GLOBAL_POSITION_INT", blocking=True, timeout=1
+            )
             if msg:
                 position = {"lat": msg.lat / 1e7, "lon": msg.lon / 1e7}
                 json_position = json.dumps(position)
@@ -160,7 +162,9 @@ async def altitude(websocket: WebSocket):
     await websocket.accept()
     while True:
         try:
-            msg = the_connection.recv_match(type="GLOBAL_POSITION_INT", blocking=True)
+            msg = the_connection.recv_match(
+                type="GLOBAL_POSITION_INT", blocking=True, timeout=1
+            )
             if msg:
                 position = {"alt": msg.alt / 1000}
                 json_position = json.dumps(position)

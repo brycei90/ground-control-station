@@ -14,7 +14,9 @@ const Map = () => {
     const fetch_position = async () => {
       try {
         const response = await api.get("/position");
-        update_position(response.data);
+        const data = response.data;
+        const new_position: LatLngExpression = [data.lat, data.long];
+        update_position(new_position);
       } catch (error) {
         console.error("Error fetching position:", error);
       }

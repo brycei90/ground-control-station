@@ -10,7 +10,6 @@ const Voltage = () => {
       try {
         const data = JSON.parse(event.data);
         if ("voltage" in data) {
-          console.log(data.voltage);
           updateVoltage(data.voltage);
         }
       } catch (error) {
