@@ -1,19 +1,18 @@
 import React, { useEffect, useState } from "react";
 import api from "../api";
 
-interface ModeResponse {
-  mode: string;
-}
 const Mode = () => {
-  const [mode, updateMode] = useState<string>("...");
+  const [mode, updateMode] = useState("unknown");
   useEffect(() => {
     const fetchMode = async () => {
-      const response = await api.get<ModeResponse>("/modeGet");
-      updateMode(response.data.mode);
+      const response = await api.get("/modeGet");
+      const data = response.data.mode;
+      console.log(data);
+      updateMode(data.mode);
     };
     fetchMode();
     console.log(mode);
-  }, []);
+  }, [mode]);
 
   return <div>Mode: {mode}</div>;
 };

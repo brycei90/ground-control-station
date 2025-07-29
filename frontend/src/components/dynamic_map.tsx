@@ -2,13 +2,20 @@
 // import api from "../api";
 import { type LatLngExpression } from "leaflet";
 import { useEffect, useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+
+const MapUpdate = ({ position }: { position: LatLngExpression }) => {
+  const map = useMap();
+  useEffect(() => {
+    map.setView(position);
+  }, [position, map]);
+  return null;
+};
 
 const DynamicMap = () => {
   const [position, update_position] = useState<LatLngExpression>([
     51.0447, -114.0719,
   ]);
-
   useEffect(() => {
     const socket = new WebSocket("ws://localhost:8000/gps_position");
 
@@ -34,6 +41,7 @@ const DynamicMap = () => {
       <Marker position={position}>
         <Popup>Drone here!</Popup>
       </Marker>
+      <MapUpdate position={position} />
     </MapContainer>
   );
 };

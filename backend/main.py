@@ -111,7 +111,8 @@ async def get_mode(response_model=ModeRequest):
 
 @app.get("/connection_status", response_model=ModeRequest)
 async def connection_status():
-    if connection_status:
+    msg = the_connection.recv_match(type="HEARTBEAT", blocking=True)
+    if msg:
         return {"mode": "connected"}
     else:
         return {"mode": "disconnected"}
