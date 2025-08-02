@@ -10,6 +10,7 @@ import { Arm } from "./components/Arm";
 import Connection from "./components/Connection";
 import Mode from "./components/Mode";
 import SetMode from "./components/setMode";
+import Takeoff from "./components/Takeoff";
 
 function App() {
   return (
@@ -50,7 +51,7 @@ function App() {
         <ul className="list-group list-group-horizontal gap-4">
           <Arm />
           <SetMode />
-          <li className="list-group-item flex-fill">A third item</li>
+          <Takeoff />
         </ul>
       </div>
     </div>

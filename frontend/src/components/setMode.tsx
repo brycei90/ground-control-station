@@ -26,6 +26,13 @@ const SetAuto = () => {
         </Dropdown.Item>
         <Dropdown.Item
           onClick={() => {
+            clickHandler("guided");
+          }}
+        >
+          Guided
+        </Dropdown.Item>
+        <Dropdown.Item
+          onClick={() => {
             clickHandler("stabilize");
           }}
         >

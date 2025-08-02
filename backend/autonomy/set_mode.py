@@ -19,6 +19,24 @@ def set_auto(the_connection):
     print(msg)
 
 
+def set_guided(the_connection):
+    the_connection.mav.command_long_send(
+        the_connection.target_system,
+        the_connection.target_component,
+        mavutil.mavlink.MAV_CMD_DO_SET_MODE,
+        0,  # confirmation
+        mavutil.mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED,  # command specific parameters
+        4,  # set guided
+        0,
+        0,
+        0,
+        0,
+        0,
+    )
+    msg = the_connection.recv_match(type="COMMAND_ACK", blocking=True)
+    print(msg)
+
+
 def set_stabilize(the_connection):
     the_connection.mav.command_long_send(
         the_connection.target_system,

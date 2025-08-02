@@ -10,6 +10,7 @@ from pymavlink import mavutil
 from autonomy import arm
 import autonomy.set_mode as mode
 from autonomy.arm import arm_drone, disarm_drone
+from autonomy.takeOff import takeOff
 
 app = FastAPI()
 
@@ -72,6 +73,9 @@ async def set_manual(request: ModeRequest):
         mode.Loiter(the_connection)
     elif request.mode == "autotune":
         mode.set_autoTune(the_connection)
+    elif request.mode == "guided":
+        mode.set_guided(the_connection)
+
     print(request.mode)
 
 
@@ -116,6 +120,11 @@ async def connection_status():
         return {"mode": "connected"}
     else:
         return {"mode": "disconnected"}
+
+
+@app.get("/takeoff")
+async def takeoff():
+    takeOff(the_connection)
 
 
 @app.websocket("/battery")
