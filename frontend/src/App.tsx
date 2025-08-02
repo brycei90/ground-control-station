@@ -5,7 +5,7 @@ import Header from "./components/Header";
 import DynamicMap from "./components/dynamic_map";
 import Current from "./components/Current";
 import Voltage from "./components/Voltage";
-import { Altitude } from "./components/Altitude";
+import Altitude from "./components/Altitude";
 import { Arm } from "./components/Arm";
 import Connection from "./components/Connection";
 import Mode from "./components/Mode";

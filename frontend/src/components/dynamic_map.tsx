@@ -3,6 +3,7 @@
 import { type LatLngExpression } from "leaflet";
 import { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import ReconnectingWebSocket from "reconnecting-websocket";
 
 const MapUpdate = ({ position }: { position: LatLngExpression }) => {
   const map = useMap();
@@ -17,7 +18,16 @@ const DynamicMap = () => {
     51.0447, -114.0719,
   ]);
   useEffect(() => {
-    const socket = new WebSocket("ws://localhost:8000/gps_position");
+    const options = {
+      maxRetries: 10,
+      reconnectInterval: 3000,
+    };
+
+    const socket = new ReconnectingWebSocket(
+      "ws://localhost:8000/gps_position",
+      [],
+      options
+    );
 
     socket.onmessage = (event) => {
       try {

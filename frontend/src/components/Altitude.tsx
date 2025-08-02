@@ -1,20 +1,22 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
+import ReconnectingWebSocket from "reconnecting-websocket";
 
-export const Altitude = () => {
+const Altitude = () => {
   const [Altitude, updateAltitude] = useState<number>(0);
-  const socket = useRef<WebSocket | null>(null);
+
   useEffect(() => {
-    let retryTimeout: ReturnType<typeof setTimeout>;
-
-    const connect = () => {
-      socket.current = new WebSocket("ws://localhost:8000/altitude");
-
-      socket.current.onopen = () => {
-        console.log("websocket connected to altitude");
-      };
+    const options = {
+      maxRetries: 10,
+      reconnectInterval: 3000,
     };
 
-    socket.current.onmessage = (event) => {
+    const socket = new ReconnectingWebSocket(
+      "ws://localhost:8000/altitude",
+      [],
+      options
+    );
+
+    socket.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
         if ("alt" in data) {
@@ -30,12 +32,11 @@ export const Altitude = () => {
 
     socket.onerror = (err) => {
       console.error("WebSocket error for altitude:", err);
-      socket?.close(); //force reconnect on error
+      socket?.close();
     };
 
     socket.onclose = () => {
       console.log("WebSocket closed");
-      retryTimeout = setTimeout(Connect, 2000);
     };
 
     return () => socket.close(); // cleanup on unmount

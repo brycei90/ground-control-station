@@ -1,10 +1,20 @@
 import React, { useEffect, useState } from "react";
+import ReconnectingWebSocket from "reconnecting-websocket";
 
 const Voltage = () => {
   const [voltage, updateVoltage] = useState<number>(0);
 
   useEffect(() => {
-    const socket = new WebSocket("ws://localhost:8000/battery");
+    const options = {
+      maxRetries: 10,
+      reconnectInterval: 3000,
+    };
+
+    const socket = new ReconnectingWebSocket(
+      "ws://localhost:8000/battery",
+      [],
+      options
+    );
 
     socket.onmessage = (event) => {
       try {
