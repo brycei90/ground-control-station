@@ -7,7 +7,7 @@ const Mode = () => {
     const fetchMode = async () => {
       const response = await api.get("/modeGet");
       const data = response.data.mode;
-      console.log(data);
+      console.log(data.mode);
       updateMode(data.mode);
     };
     fetchMode();

@@ -38,6 +38,7 @@ const DynamicMap = () => {
         console.error("Error fetching position:", error);
       }
     };
+    return () => socket.close();
   }, []);
 
   return (

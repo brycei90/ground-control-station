@@ -26,10 +26,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+sitl = "udp:172.23.192.1:14550"
+drone = "COM3"
+baud = 57600
 
 print("attempting connection")
 
-the_connection = mavutil.mavlink_connection("udp:172.23.192.1:14550")
+the_connection = mavutil.mavlink_connection(sitl)
 
 the_connection.wait_heartbeat()
 print(
@@ -47,6 +50,26 @@ class ModeRequest(BaseModel):
 
 class ArmRequest(BaseModel):
     mode: str
+
+
+latest_data = {}
+
+
+async def mavlink_listener():
+    while True:
+        try:
+            msg = the_connection.recv_match(blocking=False)
+            if msg:
+                msg_type = msg.get_type()
+                latest_data[msg_type] = msg
+        except Exception as e:
+            print("mavlink listener error", e)
+        await asyncio.sleep(0.01)
+
+
+@app.on_event("startup")
+async def start_listener():
+    asyncio.create_task(mavlink_listener())
 
 
 @app.post("/arm")
@@ -103,10 +126,10 @@ async def get_mode(response_model=ModeRequest):
         21: "SMART_RTL",
     }
     try:
-        msg = the_connection.recv_match(type="HEARTBEAT", blocking=True, timeout=1)
-        if msg:
-            if msg.custom_mode in ARDUCOPTER_MODES:
-                modeCurrent = {"mode": msg.custom_mode}
+        heartbeat = latest_data.get("HEARTBEAT")
+        if heartbeat:
+            if heartbeat.custom_mode in ARDUCOPTER_MODES:
+                modeCurrent = {"mode": heartbeat.custom_mode}
                 json_mode = json.dumps(modeCurrent)
                 return json_mode
     except Exception as e:
@@ -115,8 +138,8 @@ async def get_mode(response_model=ModeRequest):
 
 @app.get("/connection")
 async def connection_status():
-    msg = the_connection.recv_match(type="HEARTBEAT", blocking=True)
-    if msg:
+    heartbeat = latest_data.get("HEARTBEAT")
+    if heartbeat:
         return {"mode": "connected"}
     else:
         return {"mode": "disconnected"}
@@ -132,17 +155,19 @@ async def battery(websocket: WebSocket):
     await websocket.accept()
     while True:
         try:
-            msg = the_connection.recv_match(type="SYS_STATUS", blocking=True, timeout=1)
-            if msg:
+            sys = latest_data.get("SYS_STATUS")
+            if sys:
                 battery_status = {
-                    "voltage": round(msg.voltage_battery / 1000, 2),
-                    "current": round(msg.current_battery / 100.0, 2),
+                    "voltage": round(sys.voltage_battery / 1000, 2),
+                    "current": round(sys.current_battery / 100.0, 2),
+                    "battery_rem": sys.battery_remaining,
                 }
                 json_battery = json.dumps(battery_status)
                 await websocket.send_text(json_battery)
-            await asyncio.sleep(3)
+            await asyncio.sleep(0.5)
         except WebSocketDisconnect:
             print("Client disconnected from /battery")
+            break
         except Exception as e:
             print("Battery WebSocket error", e)
             break
@@ -153,16 +178,15 @@ async def get_gps_position(websocket: WebSocket):
     await websocket.accept()
     while True:
         try:
-            msg = the_connection.recv_match(
-                type="GLOBAL_POSITION_INT", blocking=True, timeout=1
-            )
-            if msg:
-                position = {"lat": msg.lat / 1e7, "lon": msg.lon / 1e7}
+            pos = latest_data.get("GLOBAL_POSITION_INT")
+            if pos:
+                position = {"lat": pos.lat / 1e7, "lon": pos.lon / 1e7}
                 json_position = json.dumps(position)
                 await websocket.send_text(json_position)
             await asyncio.sleep(1)
         except WebSocketDisconnect:
             print("Client disconnected from /gps_position")
+            break
         except Exception as e:
             print("GPS websocket error", e)
 
@@ -172,15 +196,38 @@ async def altitude(websocket: WebSocket):
     await websocket.accept()
     while True:
         try:
-            msg = the_connection.recv_match(
-                type="GLOBAL_POSITION_INT", blocking=True, timeout=1
-            )
-            if msg:
-                position = {"alt": msg.alt / 1000}
+            pos = latest_data.get("GLOBAL_POSITION_INT")
+            if pos:
+                position = {"alt": pos.alt / 1000}
                 json_position = json.dumps(position)
                 await websocket.send_text(json_position)
             await asyncio.sleep(1)
         except WebSocketDisconnect:
             print("Client disconnected from /altitude")
+            break
         except Exception as e:
             print("Altitude websocket error", e)
+
+
+@app.websocket("/telemetry")
+async def telemetry(websocket: WebSocket):
+    await websocket.accept()
+    while True:
+        try:
+            sys = latest_data.get("SYS_STATUS")
+            hud = latest_data.get("VFR_HUD")
+            rc = latest_data.get("RC_CHANNELS")
+            if sys and hud and rc and hasattr(rc, "chan3_raw"):
+                telem = {
+                    "current": sys.current_battery / 100.0,
+                    "auto_throttle": hud.throttle,
+                    "throttle_percent": (rc.chan3_raw - 1000) / 10,
+                }
+                json_telemetry = json.dumps(telem)
+                await websocket.send_text(json_telemetry)
+            await asyncio.sleep(0.5)
+        except WebSocketDisconnect:
+            print("Client disconnected from /telemetry")
+            break
+        except Exception as e:
+            print("Telemetry websocket error", e)

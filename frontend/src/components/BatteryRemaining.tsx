@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import ReconnectingWebSocket from "reconnecting-websocket";
 
-const Altitude = () => {
-  const [Altitude, updateAltitude] = useState<number>(0);
+const Batt_remaining = () => {
+  const [voltage, updateVoltage] = useState<number>(0);
 
   useEffect(() => {
     const options = {
@@ -11,7 +11,7 @@ const Altitude = () => {
     };
 
     const socket = new ReconnectingWebSocket(
-      "ws://localhost:8000/altitude",
+      "ws://localhost:8000/battery",
       [],
       options
     );
@@ -19,21 +19,20 @@ const Altitude = () => {
     socket.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-        updateAltitude(data.alt);
+        if ("battery_rem" in data) {
+          updateVoltage(data.Battery_rem);
+        }
       } catch (error) {
         console.error("Error parsing WebSocket data:", error);
       }
     };
-    //still working on this... this is meant to automatically reconnect
-    //websocket... but need to make this a function and call it in a
-    //useEffect
 
     socket.onerror = (err) => {
-      console.error("WebSocket error for altitude:", err);
+      console.error("WebSocket error for voltage:", err);
     };
 
     socket.onclose = () => {
-      console.log("WebSocket closed attempting reconnection");
+      console.log("WebSocket closed");
     };
 
     return () => socket.close(); // cleanup on unmount
@@ -41,9 +40,9 @@ const Altitude = () => {
 
   return (
     <div>
-      <strong>Alt:</strong> {Altitude}m
+      <strong>Battery Remaining:</strong> {voltage}
     </div>
   );
 };
 
-export default Altitude;
+export default Batt_remaining;

@@ -7,7 +7,7 @@ const Connection = () => {
   useEffect(() => {
     const fetchConnection = async () => {
       try {
-        const response = await api.get("/connection_status");
+        const response = await api.get("/connection");
         if (response.data.mode == "connected") {
           setConnection("connected");
         } else {
