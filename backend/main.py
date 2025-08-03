@@ -150,6 +150,25 @@ async def takeoff():
     takeOff(the_connection)
 
 
+@app.websocket("/satellite")
+async def satelites(websocket: WebSocket):
+    await websocket.accept()
+    while True:
+        try:
+            gps = latest_data.get("GPS_STATUS")
+            if gps:
+                satellite_status = {"satellites": gps.satellites_visible}
+                json_sats = json.dumps(satellite_status)
+                await websocket.send_text(json_sats)
+            await asyncio.sleep(5)
+        except WebSocketDisconnect:
+            print("Client disconnected from /satelite")
+            break
+        except Exception as e:
+            print("Battery WebSocket error", e)
+            break
+
+
 @app.websocket("/battery")
 async def battery(websocket: WebSocket):
     await websocket.accept()
@@ -198,7 +217,7 @@ async def altitude(websocket: WebSocket):
         try:
             pos = latest_data.get("GLOBAL_POSITION_INT")
             if pos:
-                position = {"alt": pos.alt / 1000}
+                position = {"alt": pos.relative_alt / 1000.0}
                 json_position = json.dumps(position)
                 await websocket.send_text(json_position)
             await asyncio.sleep(1)

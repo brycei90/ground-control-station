@@ -56,13 +56,13 @@ const Graph = () => {
         <Line
           type="monotone"
           dataKey="rc_throttle"
-          stroke="#8884d8"
+          stroke="#0d00ffff"
           strokeWidth={2}
         />
         <Line
           type="monotone"
           dataKey="auto_throttle"
-          stroke="#8884d8"
+          stroke="#000000ff"
           strokeWidth={2}
         />
       </LineChart>

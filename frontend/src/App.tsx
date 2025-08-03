@@ -12,6 +12,7 @@ import Mode from "./components/Mode";
 import SetMode from "./components/setMode";
 import Takeoff from "./components/Takeoff";
 import Batt_remaining from "./components/BatteryRemaining";
+import Satellites from "./components/satellite";
 
 function App() {
   return (
@@ -28,7 +29,9 @@ function App() {
           <li className="list-group-item flex-fill">
             <Connection />
           </li>
-          <li className="list-group-item flex-fill">2</li>
+          <li className="list-group-item flex-fill">
+            <Satellites />
+          </li>
           <li className="list-group-item flex-fill">3</li>
         </ul>
         <ul className="list-group list-group-horizontal p-1 gap-1">
