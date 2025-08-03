@@ -113,7 +113,7 @@ async def get_mode(response_model=ModeRequest):
         print("set mode error: ", e)
 
 
-@app.get("/connection_status", response_model=ModeRequest)
+@app.get("/connection")
 async def connection_status():
     msg = the_connection.recv_match(type="HEARTBEAT", blocking=True)
     if msg:
