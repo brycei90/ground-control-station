@@ -13,6 +13,7 @@ import SetMode from "./components/setMode";
 import Takeoff from "./components/Takeoff";
 import Batt_remaining from "./components/BatteryRemaining";
 import Satellites from "./components/satellite";
+import Land from "./components/Land";
 
 function App() {
   return (
@@ -32,7 +33,9 @@ function App() {
           <li className="list-group-item flex-fill">
             <Satellites />
           </li>
-          <li className="list-group-item flex-fill">3</li>
+          <li className="list-group-item flex-fill">
+            <Mode />
+          </li>
         </ul>
         <ul className="list-group list-group-horizontal p-1 gap-1">
           <li className="list-group-item flex-fill">
@@ -52,17 +55,11 @@ function App() {
           <li className="list-group-item flex-fill">1</li>
           <li className="list-group-item flex-fill">2</li>
         </ul>
-        <ul className="list-group list-group-horizontal w-30">
-          <li className="list-group-item flex-fill">
-            <Mode />
-          </li>
-          <li className="list-group-item flex-fill">2</li>
-          <li className="list-group-item flex-fill">3</li>
-        </ul>
         <ul className="list-group list-group-horizontal gap-4">
           <Arm />
           <SetMode />
           <Takeoff />
+          <Land />
         </ul>
       </div>
     </div>

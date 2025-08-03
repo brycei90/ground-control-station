@@ -1,18 +1,39 @@
 import React, { useEffect, useState } from "react";
-import api from "../api";
+import ReconnectingWebSocket from "reconnecting-websocket";
 
 const Mode = () => {
-  const [mode, updateMode] = useState("unknown");
+  const [mode, updateMode] = useState<string>("undetermined");
+
   useEffect(() => {
-    const fetchMode = async () => {
-      const response = await api.get("/modeGet");
-      const data = response.data.mode;
-      console.log(data.mode);
-      updateMode(data.mode);
+    const options = {
+      maxRetries: 10,
+      reconnectInterval: 3000,
     };
-    fetchMode();
-    console.log(mode);
-  }, [mode]);
+    const socket = new ReconnectingWebSocket(
+      "ws://localhost:8000/telemetry",
+      [],
+      options
+    );
+
+    try {
+      socket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        updateMode(data.mode);
+      };
+    } catch (err) {
+      console.error("failed to parse mode message: ", err);
+    }
+
+    socket.onerror = (err) => {
+      console.error("WebSocket error for mode:", err);
+    };
+
+    socket.onclose = () => {
+      console.log("WebSocket closed");
+    };
+
+    return () => socket.close();
+  }, []);
 
   return <div>Mode: {mode}</div>;
 };

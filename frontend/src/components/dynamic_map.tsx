@@ -24,7 +24,7 @@ const DynamicMap = () => {
     };
 
     const socket = new ReconnectingWebSocket(
-      "ws://localhost:8000/gps_position",
+      "ws://localhost:8000/telemetry",
       [],
       options
     );

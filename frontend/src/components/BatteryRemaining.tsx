@@ -11,7 +11,7 @@ const Batt_remaining = () => {
     };
 
     const socket = new ReconnectingWebSocket(
-      "ws://localhost:8000/battery",
+      "ws://localhost:8000/telemetry",
       [],
       options
     );
@@ -20,7 +20,7 @@ const Batt_remaining = () => {
       try {
         const data = JSON.parse(event.data);
         if ("battery_rem" in data) {
-          updateVoltage(data.Battery_rem);
+          updateVoltage(data.battery_rem);
         }
       } catch (error) {
         console.error("Error parsing WebSocket data:", error);

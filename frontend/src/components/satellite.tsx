@@ -11,7 +11,7 @@ const Satellites = () => {
     };
 
     const socket = new ReconnectingWebSocket(
-      "ws://localhost:8000/satellite",
+      "ws://localhost:8000/telemetry",
       [],
       options
     );
@@ -19,7 +19,7 @@ const Satellites = () => {
     socket.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-        updateSats(data.satelite);
+        updateSats(data.satellites);
       } catch (error) {
         console.error("Error parsing WebSocket data:", error);
       }

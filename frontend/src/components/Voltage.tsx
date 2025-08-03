@@ -11,7 +11,7 @@ const Voltage = () => {
     };
 
     const socket = new ReconnectingWebSocket(
-      "ws://localhost:8000/battery",
+      "ws://localhost:8000/telemetry",
       [],
       options
     );

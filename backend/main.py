@@ -10,7 +10,7 @@ from pymavlink import mavutil
 from autonomy import arm
 import autonomy.set_mode as mode
 from autonomy.arm import arm_drone, disarm_drone
-from autonomy.takeOff import takeOff
+from autonomy.takeOff import takeOff, land
 
 app = FastAPI()
 
@@ -102,40 +102,6 @@ async def set_manual(request: ModeRequest):
     print(request.mode)
 
 
-@app.get("/modeGet")
-async def get_mode(response_model=ModeRequest):
-    ARDUCOPTER_MODES = {
-        0: "STABILIZE",
-        1: "ACRO",
-        2: "ALT_HOLD",
-        3: "AUTO",
-        4: "GUIDED",
-        5: "LOITER",
-        6: "RTL",
-        7: "CIRCLE",
-        9: "LAND",
-        11: "DRIFT",
-        13: "SPORT",
-        14: "FLIP",
-        15: "AUTOTUNE",
-        16: "POSHOLD",
-        17: "BRAKE",
-        18: "THROW",
-        19: "AVOID_ADSB",
-        20: "GUIDED_NOGPS",
-        21: "SMART_RTL",
-    }
-    try:
-        heartbeat = latest_data.get("HEARTBEAT")
-        if heartbeat:
-            if heartbeat.custom_mode in ARDUCOPTER_MODES:
-                modeCurrent = {"mode": heartbeat.custom_mode}
-                json_mode = json.dumps(modeCurrent)
-                return json_mode
-    except Exception as e:
-        print("set mode error: ", e)
-
-
 @app.get("/connection")
 async def connection_status():
     heartbeat = latest_data.get("HEARTBEAT")
@@ -150,82 +116,9 @@ async def takeoff():
     takeOff(the_connection)
 
 
-@app.websocket("/satellite")
-async def satelites(websocket: WebSocket):
-    await websocket.accept()
-    while True:
-        try:
-            gps = latest_data.get("GPS_STATUS")
-            if gps:
-                satellite_status = {"satellites": gps.satellites_visible}
-                json_sats = json.dumps(satellite_status)
-                await websocket.send_text(json_sats)
-            await asyncio.sleep(5)
-        except WebSocketDisconnect:
-            print("Client disconnected from /satelite")
-            break
-        except Exception as e:
-            print("Battery WebSocket error", e)
-            break
-
-
-@app.websocket("/battery")
-async def battery(websocket: WebSocket):
-    await websocket.accept()
-    while True:
-        try:
-            sys = latest_data.get("SYS_STATUS")
-            if sys:
-                battery_status = {
-                    "voltage": round(sys.voltage_battery / 1000, 2),
-                    "current": round(sys.current_battery / 100.0, 2),
-                    "battery_rem": sys.battery_remaining,
-                }
-                json_battery = json.dumps(battery_status)
-                await websocket.send_text(json_battery)
-            await asyncio.sleep(0.5)
-        except WebSocketDisconnect:
-            print("Client disconnected from /battery")
-            break
-        except Exception as e:
-            print("Battery WebSocket error", e)
-            break
-
-
-@app.websocket("/gps_position")
-async def get_gps_position(websocket: WebSocket):
-    await websocket.accept()
-    while True:
-        try:
-            pos = latest_data.get("GLOBAL_POSITION_INT")
-            if pos:
-                position = {"lat": pos.lat / 1e7, "lon": pos.lon / 1e7}
-                json_position = json.dumps(position)
-                await websocket.send_text(json_position)
-            await asyncio.sleep(1)
-        except WebSocketDisconnect:
-            print("Client disconnected from /gps_position")
-            break
-        except Exception as e:
-            print("GPS websocket error", e)
-
-
-@app.websocket("/altitude")
-async def altitude(websocket: WebSocket):
-    await websocket.accept()
-    while True:
-        try:
-            pos = latest_data.get("GLOBAL_POSITION_INT")
-            if pos:
-                position = {"alt": pos.relative_alt / 1000.0}
-                json_position = json.dumps(position)
-                await websocket.send_text(json_position)
-            await asyncio.sleep(1)
-        except WebSocketDisconnect:
-            print("Client disconnected from /altitude")
-            break
-        except Exception as e:
-            print("Altitude websocket error", e)
+@app.get("/land")
+async def Land():
+    land(the_connection)
 
 
 @app.websocket("/telemetry")
@@ -233,18 +126,73 @@ async def telemetry(websocket: WebSocket):
     await websocket.accept()
     while True:
         try:
+
+            telemetry_data = {}
+
             sys = latest_data.get("SYS_STATUS")
             hud = latest_data.get("VFR_HUD")
             rc = latest_data.get("RC_CHANNELS")
-            if sys and hud and rc and hasattr(rc, "chan3_raw"):
-                telem = {
-                    "current": sys.current_battery / 100.0,
-                    "auto_throttle": hud.throttle,
-                    "throttle_percent": (rc.chan3_raw - 1000) / 10,
+            gps = latest_data.get("GLOBAL_POSITION_INT")
+            gps_raw = latest_data.get("GPS_RAW_INT")
+            heartbeat = latest_data.get("HEARTBEAT")
+
+            if sys:
+                telemetry_data.update(
+                    {
+                        "voltage": round(sys.voltage_battery / 1000.0, 2),
+                        "current": round(sys.current_battery / 100.0, 2),
+                        "battery_rem": sys.battery_remaining,
+                    }
+                )
+            if hud and rc and hasattr(rc, "chan3_raw"):
+                telemetry_data.update(
+                    {
+                        "auto_throttle": hud.throttle,
+                        "rc_throttle": round((rc.chan3_raw - 1000) / 10.0, 1),
+                    }
+                )
+            if gps:
+                telemetry_data.update(
+                    {
+                        "lat": gps.lat / 1e7,
+                        "lon": gps.lon / 1e7,
+                        "alt_agl": gps.relative_alt / 1000.0,
+                    }
+                )
+            if gps_raw:
+                telemetry_data["satellites"] = gps_raw.satellites_visible
+
+            if heartbeat:
+                ARDUCOPTER_MODES = {
+                    0: "STABILIZE",
+                    1: "ACRO",
+                    2: "ALT_HOLD",
+                    3: "AUTO",
+                    4: "GUIDED",
+                    5: "LOITER",
+                    6: "RTL",
+                    7: "CIRCLE",
+                    9: "LAND",
+                    11: "DRIFT",
+                    13: "SPORT",
+                    14: "FLIP",
+                    15: "AUTOTUNE",
+                    16: "POSHOLD",
+                    17: "BRAKE",
+                    18: "THROW",
+                    19: "AVOID_ADSB",
+                    20: "GUIDED_NOGPS",
+                    21: "SMART_RTL",
                 }
-                json_telemetry = json.dumps(telem)
-                await websocket.send_text(json_telemetry)
-            await asyncio.sleep(0.5)
+                if heartbeat.custom_mode in ARDUCOPTER_MODES:
+                    telemetry_data.update(
+                        {"mode": ARDUCOPTER_MODES[heartbeat.custom_mode]}
+                    )
+            if telemetry_data:
+                await websocket.send_text(json.dumps(telemetry_data))
+
+            await asyncio.sleep(0.1)  # updates 10 times per second
+
         except WebSocketDisconnect:
             print("Client disconnected from /telemetry")
             break

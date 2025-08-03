@@ -11,7 +11,7 @@ const Altitude = () => {
     };
 
     const socket = new ReconnectingWebSocket(
-      "ws://localhost:8000/altitude",
+      "ws://localhost:8000/telemetry",
       [],
       options
     );
@@ -19,7 +19,7 @@ const Altitude = () => {
     socket.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-        updateAltitude(data.alt);
+        updateAltitude(data.alt_agl);
       } catch (error) {
         console.error("Error parsing WebSocket data:", error);
       }
