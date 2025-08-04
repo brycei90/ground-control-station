@@ -186,7 +186,9 @@ async def telemetry(websocket: WebSocket):
                 }
                 if heartbeat.custom_mode in ARDUCOPTER_MODES:
                     telemetry_data.update(
-                        {"mode": ARDUCOPTER_MODES[heartbeat.custom_mode]}
+                        {
+                            "mode": ARDUCOPTER_MODES[heartbeat.custom_mode],
+                        }
                     )
             if telemetry_data:
                 await websocket.send_text(json.dumps(telemetry_data))
