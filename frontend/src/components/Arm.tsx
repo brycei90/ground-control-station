@@ -2,18 +2,20 @@ import React, { useEffect, useState } from "react";
 import api from "../api";
 
 export const Arm = () => {
-  const [arm, setArm] = useState("none");
+  const [arm, setArm] = useState("ARM");
   const [click, setClick] = useState(0);
 
   useEffect(() => {
     const arm_drone = async () => {
       try {
-        if (arm === "Arm") {
-          await api.post("/arm", { mode: "arm" });
-          setArm("Disarm");
-        } else {
-          await api.post("/arm", { mode: "disarm" });
-          setArm("Arm");
+        if (click >= 1) {
+          if (arm === "Arm") {
+            await api.post("/arm", { mode: "arm" });
+            setArm("Disarm");
+          } else {
+            await api.post("/arm", { mode: "disarm" });
+            setArm("Arm");
+          }
         }
       } catch (error) {
         console.error("Error arming", error);

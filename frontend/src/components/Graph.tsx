@@ -21,8 +21,17 @@ const Graph = () => {
       auto_throttle: number;
     }[]
   >([]);
+
   useEffect(() => {
-    const socket = new ReconnectingWebSocket("ws://localhost:8000/telemetry");
+    const options = {
+      maxRetries: 10,
+      reconnectInterval: 3000,
+    };
+    const socket = new ReconnectingWebSocket(
+      "ws://localhost:8000/telemetry",
+      [],
+      options
+    );
 
     socket.onmessage = (event) => {
       const parsed_data = JSON.parse(event.data);
@@ -34,36 +43,58 @@ const Graph = () => {
       };
       setData((prevData) => [...prevData.slice(-49), newPoint]);
     };
+
     return () => socket.close();
   }, []);
+
   return (
     <ResponsiveContainer width="100%" height={300}>
-      <LineChart data={data}>
+      <LineChart data={data} key={data.length}>
         <CartesianGrid stroke="#ccc" />
         <XAxis
           dataKey="time"
-          tickFormatter={(tick) => new Date(tick).toLocaleTimeString()}
+          tickFormatter={(tick) =>
+            new Date(tick).toLocaleTimeString("en-US", {
+              hour12: false,
+              hour: "2-digit",
+              minute: "2-digit",
+              second: "2-digit",
+            })
+          }
         />
-        <YAxis />
+        <YAxis
+          domain={[0, "auto"]}
+          label={{
+            value: "Current / Throttle",
+            angle: -90,
+            position: "centre",
+          }}
+        />
         <Tooltip />
         <Legend />
         <Line
-          type="monotone"
+          type="linear"
           dataKey="current"
           stroke="#ff0101ff"
           strokeWidth={2}
+          dot={false}
+          animationDuration={0}
         />
         <Line
-          type="monotone"
+          type="linear"
           dataKey="rc_throttle"
           stroke="#0d00ffff"
           strokeWidth={2}
+          dot={false}
+          animationDuration={0}
         />
         <Line
-          type="monotone"
+          type="linear"
           dataKey="auto_throttle"
           stroke="#000000ff"
           strokeWidth={2}
+          dot={false}
+          animationDuration={0}
         />
       </LineChart>
     </ResponsiveContainer>

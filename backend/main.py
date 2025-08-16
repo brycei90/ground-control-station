@@ -31,9 +31,10 @@ drone = "COM3"
 baud = 57600
 
 print("attempting connection")
-
-the_connection = mavutil.mavlink_connection(sitl)
-
+try:
+    the_connection = mavutil.mavlink_connection(sitl)
+except Exception as e:
+    print("failure to connect", e)
 the_connection.wait_heartbeat()
 print(
     "Heartbeat from system (system %u component %u)"
@@ -111,14 +112,12 @@ async def connection_status():
         return {"mode": "disconnected"}
 
 
-@app.get("/takeoff")
-async def takeoff():
-    takeOff(the_connection)
-
-
-@app.get("/land")
-async def Land():
-    land(the_connection)
+@app.post("/airType")
+async def takeoff(request: ModeRequest):
+    if request.mode == "land":
+        land(the_connection)
+    elif request.mode == "take off":
+        takeOff(the_connection)
 
 
 @app.websocket("/telemetry")
