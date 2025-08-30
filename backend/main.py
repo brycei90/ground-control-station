@@ -26,7 +26,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-sitl = "udp:172.23.192.1:14550"
+# run this to split mavproxy with mp
+# mavproxy.py --master="\\.\COM3,57600" --out=udp:172.23.192.1:14550 --out=udp:172.23.192.1:14551
+
+sitl = "udp:172.23.192.1:14551"
 drone = "COM3"
 baud = 57600
 
