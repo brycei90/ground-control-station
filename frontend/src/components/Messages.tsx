@@ -20,7 +20,9 @@ export const Messages = () => {
       try {
         const data = JSON.parse(event.data);
         if ("message" in data) {
-          updateMessage((prev) => [data.message, ...prev]);
+          if (message.length > 1 && message[message.length] !== data.message) {
+            updateMessage((prev) => [data.message, ...prev]);
+          }
         }
       } catch (error) {
         console.error("Error parsing WebSocket data:", error);
@@ -37,16 +39,20 @@ export const Messages = () => {
   }, [message]);
 
   return (
-    <ul className="list-group">
-      <li className="list-group-item">Messages</li>
-      {message.map((m, idx) => {
-        return (
-          <li key={idx} className="list-group-item">
-            {m}
-          </li>
-        );
-      })}
-    </ul>
+    <>
+      <div className="w-64 max-h-64 overflow-y-auto border rounded p-2">
+        <h3 className="panel-title"></h3>Messages
+        <ul className="list-group">
+          {message.map((m, idx) => {
+            return (
+              <li key={idx} className="list-group-item">
+                {m}
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    </>
   );
 };
 

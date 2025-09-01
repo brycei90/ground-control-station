@@ -154,6 +154,8 @@ async def telemetry(websocket: WebSocket):
                         "rc_throttle": round((rc.chan3_raw - 1000) / 10.0, 1),
                     }
                 )
+            if status:
+                telemetry_data.update({"message": status.text})
             if gps:
                 telemetry_data.update(
                     {
