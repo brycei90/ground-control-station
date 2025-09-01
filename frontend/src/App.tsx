@@ -13,6 +13,7 @@ import SetMode from "./components/setMode";
 import Batt_remaining from "./components/BatteryRemaining";
 import Satellites from "./components/satellite";
 import AirType from "./components/AirType";
+import Messages from "./components/Messages";
 
 function App() {
   return (
@@ -23,6 +24,9 @@ function App() {
       <div className="d-flex p-2">
         <DynamicMap />
         <Graph />
+        <div style={{ width: "400px" }}>
+          <Messages />
+        </div>
       </div>
       <div style={{ maxWidth: "40%" }} className="p-2">
         <ul className="list-group list-group-horizontal p-1 gap-1">

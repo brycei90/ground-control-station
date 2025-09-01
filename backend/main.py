@@ -29,7 +29,7 @@ app.add_middleware(
 # run this to split mavproxy with mp
 # mavproxy.py --master="\\.\COM3,57600" --out=udp:172.23.192.1:14550 --out=udp:172.23.192.1:14551
 
-sitl = "udp:172.23.192.1:14551"
+sitl = "udp:172.23.192.1:14550"
 drone = "COM3"
 baud = 57600
 
@@ -137,6 +137,7 @@ async def telemetry(websocket: WebSocket):
             gps = latest_data.get("GLOBAL_POSITION_INT")
             gps_raw = latest_data.get("GPS_RAW_INT")
             heartbeat = latest_data.get("HEARTBEAT")
+            status = latest_data.get("STATUSTEXT")
 
             if sys:
                 telemetry_data.update(
@@ -192,6 +193,7 @@ async def telemetry(websocket: WebSocket):
                             "mode": ARDUCOPTER_MODES[heartbeat.custom_mode],
                         }
                     )
+
             if telemetry_data:
                 await websocket.send_text(json.dumps(telemetry_data))
 
