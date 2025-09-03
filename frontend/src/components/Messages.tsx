@@ -3,6 +3,7 @@ import ReconnectingWebSocket from "reconnecting-websocket";
 
 export const Messages = () => {
   const [message, updateMessage] = useState<Array<string>>([]);
+  let emptyList = [];
 
   useEffect(() => {
     const options = {
@@ -19,9 +20,12 @@ export const Messages = () => {
     socket.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
+        emptyList = message;
         if ("message" in data) {
-          if (message.length > 1 && message[message.length] !== data.message) {
+          if (!emptyList.slice(0, 10).includes(data.message)) {
+            console.log(data.message);
             updateMessage((prev) => [data.message, ...prev]);
+            console.log(message);
           }
         }
       } catch (error) {
@@ -40,7 +44,7 @@ export const Messages = () => {
 
   return (
     <>
-      <div className="w-64 max-h-64 overflow-y-auto border rounded p-2">
+      <div className="overflow-auto">
         <h3 className="panel-title"></h3>Messages
         <ul className="list-group">
           {message.map((m, idx) => {
