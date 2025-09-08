@@ -3,7 +3,6 @@ import ReconnectingWebSocket from "reconnecting-websocket";
 
 export const Messages = () => {
   const [message, updateMessage] = useState<Array<string>>([]);
-  let emptyList = [];
 
   useEffect(() => {
     const options = {
@@ -20,13 +19,14 @@ export const Messages = () => {
     socket.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-        emptyList = message;
         if ("message" in data) {
-          if (!emptyList.slice(0, 10).includes(data.message)) {
-            console.log(data.message);
-            updateMessage((prev) => [data.message, ...prev]);
-            console.log(message);
-          }
+          updateMessage((prev) => {
+            if (prev.includes(data.message)) {
+              return prev;
+            }
+
+            return [data.message, ...prev];
+          });
         }
       } catch (error) {
         console.error("Error parsing WebSocket data:", error);
@@ -44,7 +44,7 @@ export const Messages = () => {
 
   return (
     <>
-      <div className="overflow-auto">
+      <div className="overflow-auto border" style={{ maxHeight: "500px" }}>
         <h3 className="panel-title"></h3>Messages
         <ul className="list-group">
           {message.map((m, idx) => {
