@@ -29,15 +29,12 @@ app.add_middleware(
 # run this to split mavproxy with mp
 # mavproxy.py --master="\\.\COM3,57600" --out=udp:172.23.192.1:14550 --out=udp:172.23.192.1:14551
 
-sitl = "udp:172.23.192.1:14550"
+sitl = "udp:127.0.0.1:14550"
 drone = "COM3"
 baud = 57600
 
 print("attempting connection")
-try:
-    the_connection = mavutil.mavlink_connection(sitl)
-except Exception as e:
-    print("failure to connect", e)
+the_connection = mavutil.mavlink_connection(sitl)
 the_connection.wait_heartbeat()
 print(
     "Heartbeat from system (system %u component %u)"
