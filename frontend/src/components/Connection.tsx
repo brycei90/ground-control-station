@@ -1,25 +1,48 @@
 import React, { useEffect, useState } from "react";
-import api from "../api";
+import ReconnectingWebSocket from "reconnecting-websocket";
 
 const Connection = () => {
-  const [connection, setConnection] = useState("disconnected");
+  const [connection, updateConnection] = useState("disconnected");
 
   useEffect(() => {
-    const fetchConnection = async () => {
+    const options = {
+      maxRetries: 10,
+      reconnectInterval: 3000,
+    };
+
+    const socket = new ReconnectingWebSocket(
+      "ws://localhost:8000/telemetry",
+      [],
+      options
+    );
+
+    socket.onmessage = (event) => {
       try {
-        const response = await api.get("/connection");
-        if (response.data.mode == "connected") {
-          setConnection("connected");
-        } else {
-          setConnection("disconnected");
+        const data = JSON.parse(event.data);
+        
+        if ("connection" in data) {
+          if(data.connection === "connected"){
+            //not making it in to here
+            updateConnection("Connected");
+          }
+        }
+        else{
+          updateConnection("Disconnected")
         }
       } catch (error) {
-        console.error("Failed to connect", error);
+        console.error("Error parsing WebSocket data:", error);
       }
     };
-    fetchConnection();
-    const interval = setInterval(fetchConnection, 3000);
-    return () => clearInterval(interval);
+
+    socket.onerror = (err) => {
+      console.error("WebSocket error for connection:", err);
+    };
+
+    socket.onclose = () => {
+      console.log("WebSocket closed");
+    };
+
+    return () => socket.close(); // cleanup on unmount
   }, []);
   return <div>{connection}</div>;
 };

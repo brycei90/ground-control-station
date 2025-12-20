@@ -4,6 +4,7 @@ import time
 import uvicorn
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
 from pydantic import BaseModel
 from typing import List
 from pymavlink import mavutil
@@ -12,7 +13,25 @@ import autonomy.set_mode as mode
 from autonomy.arm import arm_drone, disarm_drone
 from autonomy.takeOff import takeOff, land
 
-app = FastAPI()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print("starting...")
+
+    task = asyncio.create_task(mavlink_listener())
+
+    try:
+        yield
+    finally:
+        print("shutting down...")
+        task.cancel()
+        try:
+            await task
+        except asyncio.CancelledError:
+            print("error")
+
+
+app = FastAPI(lifespan=lifespan)
 
 # define frontend server ip
 origins = ["http://localhost:5173"]
@@ -29,7 +48,7 @@ app.add_middleware(
 # run this to split mavproxy with mp
 # mavproxy.py --master="\\.\COM3,57600" --out=udp:172.23.192.1:14550 --out=udp:172.23.192.1:14551
 
-sitl = "udp:172.31.80.1:14550" 
+sitl = "udp:172.31.80.1:14550"
 drone = "COM3"
 baud = 57600
 
@@ -40,7 +59,7 @@ print(
     "Heartbeat from system (system %u component %u)"
     % (the_connection.target_system, the_connection.target_component)
 )
-connection_status = True
+connection_current = "disconnected"
 
 print("connected to MAVLink")
 
@@ -55,22 +74,27 @@ class ArmRequest(BaseModel):
 
 latest_data = {}
 
+last_exec_time = time.time()
+
 
 async def mavlink_listener():
-    while True:
-        try:
-            msg = the_connection.recv_match(blocking=False)
-            if msg:
-                msg_type = msg.get_type()
-                latest_data[msg_type] = msg
-        except Exception as e:
-            print("mavlink listener error", e)
-        await asyncio.sleep(0.01)
-
-
-@app.on_event("startup")
-async def start_listener():
-    asyncio.create_task(mavlink_listener())
+    try:
+        while True:
+            current_time = time.time()
+            try:
+                msg = the_connection.recv_match(blocking=False)
+                if msg:
+                    msg_type = msg.get_type()
+                    latest_data[msg_type] = msg
+                    latest_data["connection"] = "connected"
+                elif current_time - last_exec_time >= 2:
+                    latest_data["connection"] = "disconnected"
+            except Exception as e:
+                print("mavlink listener error", e)
+            await asyncio.sleep(0.01)
+    except asyncio.CancelledError:
+        print("mavlink listener error")
+        raise
 
 
 @app.post("/arm")
@@ -103,15 +127,6 @@ async def set_manual(request: ModeRequest):
     print(request.mode)
 
 
-@app.get("/connection")
-async def connection_status():
-    heartbeat = latest_data.get("HEARTBEAT")
-    if heartbeat:
-        return {"mode": "connected"}
-    else:
-        return {"mode": "disconnected"}
-
-
 @app.post("/airType")
 async def takeoff(request: ModeRequest):
     if request.mode == "land":
@@ -135,6 +150,10 @@ async def telemetry(websocket: WebSocket):
             gps_raw = latest_data.get("GPS_RAW_INT")
             heartbeat = latest_data.get("HEARTBEAT")
             status = latest_data.get("STATUSTEXT")
+            connection = latest_data.get("connection")
+
+            if connection:
+                telemetry_data.update({"connection": latest_data["connection"]})
 
             if sys:
                 telemetry_data.update(
