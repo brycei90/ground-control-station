@@ -1,12 +1,13 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import App from "./App.tsx";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import "leaflet/dist/leaflet.css";
+import "./index.css";
+
+import App from "./App.tsx";
 import NotFound from "./pages/NotFound";
 import Plan from "./pages/Plan";
-import "leaflet/dist/leaflet.css";
 import Logs from "./pages/Logs";
-//need to import my pages
 
 const router = createBrowserRouter([
   {
@@ -15,7 +16,7 @@ const router = createBrowserRouter([
     errorElement: <NotFound />,
   },
   {
-    path: "/Plan",
+    path: "/plan",
     element: <Plan />,
     errorElement: <NotFound />,
   },

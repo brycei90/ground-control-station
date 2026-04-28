@@ -40,6 +40,7 @@ export const Messages = () => {
     socket.onclose = () => {
       console.log("WebSocket closed");
     };
+  return () => socket.close();  
   }, []);
 
   return (

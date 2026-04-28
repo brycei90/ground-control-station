@@ -7,7 +7,7 @@ function SetMode() {
     setMode(selectedMode);
 
     try {
-      const response = await fetch(`http://localhost:8000/set_mode/${selectedMode}`, {
+      const response = await fetch(`http://localhost:8000/set_mode/mode`, {
         method: "POST",
       });
 
