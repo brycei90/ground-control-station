@@ -47,7 +47,7 @@ const DynamicMap = () => {
       center={position}
       zoom={12}
       scrollWheelZoom={true}
-      style={{ height: "400px", width: "40%" }}
+      style={{ height: "460px", width: "100%" }}
     >
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
       <Marker position={position}>
