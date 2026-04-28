@@ -1,67 +1,48 @@
-import React from "react";
-import api from "../api";
-import Dropdown from "react-bootstrap/Dropdown";
+import { useState } from "react";
 
-const SetAuto = () => {
-  const clickHandler = async (id: string) => {
+function SetMode() {
+  const [mode, setMode] = useState("");
+
+  const handleModeChange = async (selectedMode: string) => {
+    setMode(selectedMode);
+
     try {
-      await api.post("/mode", { mode: id });
+      const response = await fetch(`http://localhost:8000/set_mode/${selectedMode}`, {
+        method: "POST",
+      });
+
+      if (!response.ok) {
+        console.error("Failed to set mode");
+      }
     } catch (error) {
-      console.error("could not post mode", error);
+      console.error("Error setting mode:", error);
     }
   };
+
   return (
-    <Dropdown>
-      <Dropdown.Toggle variant="success" id="dropdown-basic">
-        Set Mode
-      </Dropdown.Toggle>
+    <div className="rounded-2xl border border-cyan-400/20 bg-slate-900/70 p-4 shadow-lg shadow-cyan-950/30">
+      <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.25em] text-cyan-300">
+        Flight Mode
+      </label>
 
-      <Dropdown.Menu>
-        <Dropdown.Item
-          onClick={() => {
-            clickHandler("auto");
-          }}
-        >
-          Auto
-        </Dropdown.Item>
-        <Dropdown.Item
-          onClick={() => {
-            clickHandler("guided");
-          }}
-        >
-          Guided
-        </Dropdown.Item>
-        <Dropdown.Item
-          onClick={() => {
-            clickHandler("stabilize");
-          }}
-        >
-          Stabilize
-        </Dropdown.Item>
-        <Dropdown.Item
-          onClick={() => {
-            clickHandler("RTL");
-          }}
-        >
-          RTL
-        </Dropdown.Item>
-        <Dropdown.Item
-          onClick={() => {
-            clickHandler("loiter");
-          }}
-        >
-          Loiter
-        </Dropdown.Item>
-        <Dropdown.Item
-          onClick={() => {
-            clickHandler("autotune");
-          }}
-        >
-          AutoTune
-        </Dropdown.Item>
-      </Dropdown.Menu>
-    </Dropdown>
+      <select
+        value={mode}
+        onChange={(event) => handleModeChange(event.target.value)}
+        className="w-full rounded-xl border border-cyan-400/30 bg-slate-950 px-4 py-3 text-sm font-semibold text-cyan-100 outline-none transition hover:border-cyan-300 focus:border-cyan-300 focus:ring-2 focus:ring-cyan-400/30"
+      >
+        <option value="" disabled>
+          Select mode
+        </option>
+        <option value="STABILIZE">STABILIZE</option>
+        <option value="ALT_HOLD">ALT_HOLD</option>
+        <option value="LOITER">LOITER</option>
+        <option value="AUTO">AUTO</option>
+        <option value="GUIDED">GUIDED</option>
+        <option value="RTL">RTL</option>
+        <option value="LAND">LAND</option>
+      </select>
+    </div>
   );
-};
+}
 
-export default SetAuto;
+export default SetMode;

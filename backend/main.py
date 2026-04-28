@@ -74,7 +74,7 @@ class ArmRequest(BaseModel):
 
 latest_data = {}
 
-last_exec_time = time.time()
+last_msg_time = time.time()
 
 
 async def mavlink_listener():
@@ -84,10 +84,11 @@ async def mavlink_listener():
             try:
                 msg = the_connection.recv_match(blocking=False)
                 if msg:
+                    last_msg_time = time.time()
                     msg_type = msg.get_type()
                     latest_data[msg_type] = msg
                     latest_data["connection"] = "connected"
-                elif current_time - last_exec_time >= 2:
+                elif current_time - last_msg_time >= 2:
                     latest_data["connection"] = "disconnected"
             except Exception as e:
                 print("mavlink listener error", e)

@@ -38,7 +38,7 @@ const Graph = () => {
       const newPoint = {
         time: Date.now(),
         current: parsed_data.current,
-        rc_throttle: parsed_data.throttle_percent,
+        rc_throttle: parsed_data.rc_throttle,
         auto_throttle: parsed_data.auto_throttle,
       };
       setData((prevData) => [...prevData.slice(-49), newPoint]);

@@ -19,6 +19,7 @@ __pycache__/
 *.pyd
 *.env
 venv/
+.vite/
 
 # Node
 node_modules/

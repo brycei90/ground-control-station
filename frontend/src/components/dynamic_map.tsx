@@ -32,8 +32,9 @@ const DynamicMap = () => {
     socket.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-        const new_position: LatLngExpression = [data.lat, data.lon];
-        update_position(new_position);
+        if (typeof data.lat === "number" && typeof data.lon === "number") {
+          update_position([data.lat, data.lon]);
+        }
       } catch (error) {
         console.error("Error fetching position:", error);
       }
